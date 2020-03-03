@@ -1,0 +1,30 @@
+FROM alpine:latest
+
+# base on: https://github.com/masipcat/wireguard-go-docker
+# need --cap-add=NET_ADMIN and --device=/dev/net/tun
+
+# https://www.wireguard.com/install/
+RUN apk add --no-cache git make musl-dev go
+
+# Configure Go
+ENV GOROOT /usr/lib/go
+ENV GOPATH /go
+ENV PATH /go/bin:$PATH
+
+RUN mkdir -p ${GOPATH}/src ${GOPATH}/bin
+
+# wireguard-go
+# https://git.zx2c4.com/wireguard-go/about/
+RUN cd /root && \
+    git clone https://git.zx2c4.com/wireguard-go && \
+    cd wireguard-go && \
+    make && \
+    cp wireguard-go /usr/bin/
+
+# tools: https://github.com/faicker/wg_config
+RUN cd /root && \
+    git clone https://github.com/adrianmihalko/wg_config
+
+WORKDIR $GOPATH
+
+CMD wireguard-go -f wg0

@@ -1,18 +1,19 @@
-FROM debian:stretch
+FROM debian:buster-slim
 
 # base on: https://github.com/masipcat/wireguard-go-docker
 # need --cap-add=NET_ADMIN and --device=/dev/net/tun
 
 # debian install
 # https://www.wireguard.com/install/
-# extra golang-1.12
-RUN echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list && \
-    echo "deb http://deb.debian.org/debian stretch-updates main" >> /etc/apt/sources.list && \
-    printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable && \
+RUN echo "deb http://deb.debian.org/debian/ unstable main" | tee /etc/apt/sources.list.d/unstable-wireguard.list && \
+    printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' | tee /etc/apt/preferences.d/limit-unstable && \
     apt update && \
-    apt -y install vim git wget curl golang-1.12 make busybox qrencode iptables && \
+    apt -y install vim git wget curl make busybox qrencode iptables && \
     apt -y --no-install-recommends install wireguard-tools && \
-    ln -s /usr/lib/go-1.12/bin/go /usr/bin/go
+    wget https://dl.google.com/go/go1.13.8.linux-amd64.tar.gz && \
+    tar -xvf go1.13.8.linux-amd64.tar.gz && \
+    mv go /usr/local && \
+	export PATH=$PATH:/usr/local/go/bin
 
 # wireguard-go
 # https://git.zx2c4.com/wireguard-go/about/
